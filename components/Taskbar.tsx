@@ -23,11 +23,11 @@ export const Taskbar: React.FC<TaskbarProps> = ({ windows, onStartClick, onWindo
   };
 
   return (
-    <div className="fixed bottom-0 left-0 w-full h-[30px] xp-taskbar-gradient flex items-center z-[99999] shadow-[0_-2px_5px_rgba(0,0,0,0.3)] select-none">
+    <div className="fixed bottom-0 left-0 w-full h-[32px] sm:h-[30px] xp-taskbar-gradient flex items-center z-[99999] shadow-[0_-2px_5px_rgba(0,0,0,0.3)] select-none">
       {/* Start Button */}
       <button
         onClick={(e) => { e.stopPropagation(); onStartClick(); }}
-        className="xp-start-button-gradient h-full px-3 flex items-center gap-1.5 rounded-r-xl border-r border-green-900 shadow-[inset_1px_1px_1px_rgba(255,255,255,0.3)] group active:brightness-90 transition-all overflow-hidden touch-none"
+        className="xp-start-button-gradient h-full px-4 flex items-center gap-1.5 rounded-r-xl border-r border-green-900 shadow-[inset_1px_1px_1px_rgba(255,255,255,0.3)] group active:brightness-90 transition-all"
       >
         <img
           src="https://upload.wikimedia.org/wikipedia/commons/d/df/Microsoft_Windows_XP_Logo.svg"
@@ -43,7 +43,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({ windows, onStartClick, onWindo
           <button
             key={win.id}
             onClick={() => onWindowToggle(win.id)}
-            className={`flex items-center gap-2 px-3 h-[24px] rounded-sm text-[11px] min-w-[100px] max-w-[160px] truncate transition-colors ${
+            className={`flex items-center gap-2 px-3 h-[24px] rounded-sm text-[11px] min-w-[80px] max-w-[160px] truncate transition-colors ${
               !win.isMinimized && win.zIndex === Math.max(...windows.map(w => w.zIndex))
                 ? 'bg-[#1e52b7] text-white border border-black/30 shadow-inner'
                 : 'bg-[#3b8cf8] text-white/90 border-r border-black/20 hover:bg-[#4ea0ff]'
@@ -57,16 +57,25 @@ export const Taskbar: React.FC<TaskbarProps> = ({ windows, onStartClick, onWindo
 
       {/* System Tray */}
       <div className="h-full px-3 bg-[#0997ff] border-l border-[#0052e1] shadow-inner flex items-center gap-2">
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-3 items-center">
+          {/* Teclado Virtual Button */}
+          <button 
+            onClick={() => onOpenApp?.(AppId.OSK, 'Teclado Virtual', 'https://win98icons.alexmeub.com/icons/png/keyboard-0.png')}
+            className="hover:brightness-125 active:scale-95 transition-transform p-0.5 bg-white/10 rounded"
+            title="Abrir Teclado Virtual"
+          >
+            <img src="https://win98icons.alexmeub.com/icons/png/keyboard-0.png" className="w-4 h-4" alt="Keyboard" />
+          </button>
+          
           <button 
             onClick={() => onOpenApp?.(AppId.VOLUME_CONTROL, 'Controle de Volume', 'https://win98icons.alexmeub.com/icons/png/loudspeaker_rays-0.png')} 
-            className="hover:brightness-110 active:scale-95 transition-transform"
+            className="hover:brightness-110"
           >
              <img src="https://win98icons.alexmeub.com/icons/png/loudspeaker_rays-0.png" className="w-3.5 h-3.5" alt="Volume" />
           </button>
-          <img src="https://win98icons.alexmeub.com/icons/png/network_normal_two_pcs-0.png" className="w-4 h-4 opacity-80" alt="" />
+          <img src="https://win98icons.alexmeub.com/icons/png/network_normal_two_pcs-0.png" className="w-4 h-4 opacity-80 hidden sm:block" alt="" />
         </div>
-        <span className="text-white text-[11px] font-medium min-w-[45px] text-center">
+        <span className="text-white text-[11px] font-medium min-w-[45px] text-center ml-1">
           {formatTime(time)}
         </span>
       </div>

@@ -15,6 +15,9 @@ import { MediaPlayer } from './apps/MediaPlayer';
 import { BSOD } from './components/BSOD';
 import { LoginScreen } from './components/LoginScreen';
 import { Credits } from './apps/Credits';
+import { VirtualKeyboard } from './apps/VirtualKeyboard';
+import { Calculator } from './apps/Calculator';
+import { CommandPrompt } from './apps/CommandPrompt';
 import { playSound, XP_SOUNDS, unlockAudio } from './utils/sounds';
 
 const INITIAL_DESKTOP: DesktopItem[] = DESKTOP_ICONS.map(i => ({
@@ -36,6 +39,16 @@ const App: React.FC = () => {
   const [isCrashed, setIsCrashed] = useState(false);
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
 
+  const handleLogin = useCallback((username: string, wasAdminCode?: boolean) => {
+    setIsAuthenticated(true);
+    setCurrentUser({
+      username,
+      password: '',
+      avatar: `https://picsum.photos/seed/${username}/64`,
+      isAdmin: wasAdminCode
+    });
+  }, []);
+
   const focusWin = useCallback((id: string) => {
     setWindows(prev => {
       const newZ = maxZ + 1;
@@ -53,7 +66,6 @@ const App: React.FC = () => {
       setMaxZ(newZ);
 
       if (existingIndex !== -1) {
-        // Se a janela já existe (mesmo se foi fechada), reabre e traz para frente
         const updated = [...prev];
         updated[existingIndex] = {
           ...updated[existingIndex],
@@ -64,6 +76,9 @@ const App: React.FC = () => {
         return updated;
       }
       
+      const isMobile = window.innerWidth < 768;
+      const isOSK = appId === AppId.OSK;
+
       const newWin: WindowState = {
         id: winId,
         appId,
@@ -71,12 +86,12 @@ const App: React.FC = () => {
         icon,
         isOpen: true,
         isMinimized: false,
-        isMaximized: false,
+        isMaximized: isMobile && !isOSK, // Apps abrem maximizados no celular
         zIndex: newZ,
-        x: 100 + (prev.length * 20),
-        y: 100 + (prev.length * 20),
-        width: appId === AppId.INTERNET_EXPLORER ? '90%' : appId === AppId.CREDITS ? 450 : 600,
-        height: appId === AppId.INTERNET_EXPLORER ? '85%' : appId === AppId.CREDITS ? 500 : 450,
+        x: isMobile ? 0 : 100 + (prev.length * 20),
+        y: isMobile ? 0 : 100 + (prev.length * 20),
+        width: isOSK ? (isMobile ? '100%' : 400) : (isMobile ? '100%' : (appId === AppId.INTERNET_EXPLORER ? '80%' : 600)),
+        height: isOSK ? 200 : (isMobile ? 'calc(100% - 30px)' : 450),
         data
       };
       
@@ -87,24 +102,6 @@ const App: React.FC = () => {
     setIsStartOpen(false);
   }, [maxZ]);
 
-  const onMoveItem = useCallback((id: string, gridX: number, gridY: number) => {
-    setDesktopItems(prev => {
-      const itemToMove = prev.find(i => i.id === id);
-      if (!itemToMove) return prev;
-      return prev.map(i => i.id === id ? { ...i, gridX, gridY } : i);
-    });
-  }, []);
-
-  const handleLogin = (username: string, wasAdminCode?: boolean) => {
-    setCurrentUser({ 
-      username, 
-      password: '', 
-      avatar: `https://picsum.photos/seed/${username}/64`, 
-      isAdmin: !!wasAdminCode 
-    });
-    setIsAuthenticated(true);
-  };
-
   const renderContent = (win: WindowState) => {
     switch (win.appId) {
       case AppId.INTERNET_EXPLORER: return <InternetExplorer />;
@@ -113,6 +110,9 @@ const App: React.FC = () => {
       case AppId.MSN_MESSENGER: return <MSNMessenger />;
       case AppId.MEDIA_PLAYER: return <MediaPlayer />;
       case AppId.CREDITS: return <Credits />;
+      case AppId.OSK: return <VirtualKeyboard />;
+      case AppId.CALCULATOR: return <Calculator />;
+      case AppId.CMD: return <CommandPrompt />;
       case AppId.FOLDER: 
       case AppId.DOCUMENTS: 
       case AppId.MY_COMPUTER: 
@@ -123,7 +123,7 @@ const App: React.FC = () => {
           items={win.data} 
           onOpenApp={(item) => openApp(item.appId, item.label, item.icon, item.items)} 
         />;
-      default: return <div className="p-8 text-center text-gray-500 italic">Aplicação indisponível.</div>;
+      default: return <div className="p-8 text-center text-gray-500 italic">Aplicação em desenvolvimento.</div>;
     }
   };
 
@@ -134,22 +134,27 @@ const App: React.FC = () => {
     <div
       className="w-full h-screen relative bg-cover bg-center overflow-hidden touch-none flex flex-col select-none"
       style={{ backgroundImage: `url(${WALLPAPER_URL})` }}
-      onPointerDown={() => {
-        setSelectedItemIds(new Set());
-        setIsStartOpen(false);
+      onPointerDown={(e) => {
+        if (e.target === e.currentTarget) {
+           setSelectedItemIds(new Set());
+           setIsStartOpen(false);
+        }
         unlockAudio();
       }}
     >
-      <div className="flex-1 relative z-0">
-        {desktopItems.map(i => (
-          <DesktopIcon 
-            key={i.id} id={i.id} label={i.label} icon={i.icon}
-            gridX={i.gridX} gridY={i.gridY}
-            onOpen={() => openApp(i.appId, i.label, i.icon, i.items)} 
-            onMove={onMoveItem} 
-            isSelected={selectedItemIds.has(i.id)}
-          />
-        ))}
+      <div className="flex-1 relative z-0 p-4">
+        {/* Desktop Icons com grid responsivo via CSS inline */}
+        <div className="grid grid-flow-col grid-rows-[repeat(auto-fill,100px)] gap-2 h-full content-start">
+          {desktopItems.map(i => (
+            <DesktopIcon 
+              key={i.id} id={i.id} label={i.label} icon={i.icon}
+              gridX={i.gridX} gridY={i.gridY}
+              onOpen={() => openApp(i.appId, i.label, i.icon, i.items)} 
+              onMove={(id, x, y) => setDesktopItems(prev => prev.map(item => item.id === id ? { ...item, gridX: x, gridY: y } : item))}
+              isSelected={selectedItemIds.has(i.id)}
+            />
+          ))}
+        </div>
         
         {windows.map(win => win.isOpen && (
           <Window
@@ -184,6 +189,7 @@ const App: React.FC = () => {
       <Taskbar 
         windows={windows} 
         onStartClick={() => setIsStartOpen(!isStartOpen)} 
+        onOpenApp={(appId, title, icon) => openApp(appId, title, icon)}
         onWindowToggle={(id) => {
           const win = windows.find(w => w.id === id);
           if (win?.isMinimized || (win && win.zIndex !== Math.max(...windows.map(w => w.zIndex)))) {

@@ -23,7 +23,8 @@ export enum AppId {
   GMAIL = 'GMAIL',
   ADM_PAINEL = 'ADM_PAINEL',
   MXP_FEED = 'MXP_FEED',
-  CREDITS = 'CREDITS'
+  CREDITS = 'CREDITS',
+  OSK = 'OSK'
 }
 
 export interface WindowState {
