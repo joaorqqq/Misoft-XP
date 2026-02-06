@@ -36,7 +36,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
   const [error, setError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  const ADMIN_SECRET = 'mxpteamsuport@gmail.comDashpainelCode';
+  // Alterado para tudo minúsculo conforme solicitação
+  const ADMIN_SECRET = 'mxpteamsuport@gmail.comdashpainelcode';
 
   useEffect(() => {
     try {
@@ -69,7 +70,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
     if (isLoggingIn) return;
     setError('');
     const trimmedPass = password.trim();
-    if (trimmedPass === ADMIN_SECRET || trimmedPass.toUpperCase() === 'ADM' || trimmedPass === '777444') {
+    // Suporte a login administrativo com o segredo (agora em minúsculo) ou códigos padrão
+    if (trimmedPass.toLowerCase() === ADMIN_SECRET || trimmedPass.toUpperCase() === 'ADM' || trimmedPass === '777444') {
       performLogin(selectedUser?.username || 'Administrator', true);
       return;
     }
@@ -209,7 +211,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                 <div className="bg-yellow-50 border border-yellow-300 p-4 rounded text-center space-y-3">
                     <p className="font-bold text-red-700">ESCANEIE PARA DOAR (PIX):</p>
                     <img src={PIX_QR_URL} className="w-32 h-32 mx-auto border bg-white" alt="PIX" />
-                    <p className="font-bold text-blue-800 text-[10px] uppercase">{SUPPORT_EMAIL}</p>
+                    {/* Removido 'uppercase' para garantir que o email apareça em minúsculo */}
+                    <p className="font-bold text-blue-800 text-[10px]">{SUPPORT_EMAIL}</p>
                 </div>
               </div>
             </div>
