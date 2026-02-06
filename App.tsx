@@ -79,16 +79,15 @@ const App: React.FC = () => {
         return prev.map(w => w.id === winId ? { ...w, isOpen: true, isMinimized: false, zIndex: newZ } : w);
       }
       
-      const isTV = window.innerWidth <= 1920;
       const newWin: WindowState = {
         id: winId, appId: appId, title: title, icon: icon,
         isOpen: true, isMinimized: false,
-        isMaximized: isTV && appId !== AppId.OSK && appId !== AppId.CALCULATOR,
+        isMaximized: false,
         zIndex: newZ,
-        x: isTV ? 0 : 50 + (prev.length * 20),
-        y: isTV ? 0 : 50 + (prev.length * 20),
-        width: isTV ? '100%' : 700,
-        height: isTV ? 'calc(100% - 30px)' : 500,
+        x: 50 + (prev.length * 20),
+        y: 50 + (prev.length * 20),
+        width: 700,
+        height: 500,
         data: data
       };
       return [...prev, newWin];

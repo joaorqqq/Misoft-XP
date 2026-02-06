@@ -7,6 +7,7 @@ export const Credits: React.FC = () => {
   const TEAM_LOGO_URL = "https://i.postimg.cc/cHJGzv01/Picsart-26-02-06-15-16-00-966.jpg";
   const DISCORD_URL = "https://discord.gg/e2ty8RQyu";
   const SUPPORT_EMAIL = "mxpteamsuport@gmail.com";
+  const YOUTUBE_URL = "https://youtube.com/@odev_5?si=BbTidOTcWIyeNVNl";
 
   return (
     <div className="flex flex-col h-full bg-[#ece9d8] font-[Tahoma] overflow-hidden select-none">
@@ -38,6 +39,22 @@ export const Credits: React.FC = () => {
             <li><strong>Design Retro:</strong> Alex Meub Icons Archive</li>
             <li><strong>Sons & Nostalgia:</strong> Vocaroo Community</li>
           </ul>
+
+          <div className="border-b-2 border-red-600 pb-1 font-bold text-red-900 uppercase tracking-wider pt-4">
+            Canal do YouTube
+          </div>
+          <div className="flex flex-col items-center p-3 bg-red-50 border border-red-200 rounded">
+            <p className="text-xs mb-2 text-center">Acompanhe as novidades no meu canal!</p>
+            <a 
+              href={YOUTUBE_URL} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-[#FF0000] text-white px-6 py-2 rounded font-bold text-xs shadow hover:bg-red-700 transition-colors flex items-center gap-2 uppercase"
+            >
+              <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg" className="w-8 invert" alt="" />
+              Inscreva-se no Canal
+            </a>
+          </div>
 
           <div className="border-b-2 border-indigo-600 pb-1 font-bold text-indigo-900 uppercase tracking-wider pt-4">
             Comunidade

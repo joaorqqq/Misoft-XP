@@ -17,6 +17,7 @@ const XP_LOGO_URL = "https://upload.wikimedia.org/wikipedia/commons/d/df/Microso
 const TEAM_LOGO_URL = "https://i.postimg.cc/cHJGzv01/Picsart-26-02-06-15-16-00-966.jpg";
 const PIX_QR_URL = "https://i.postimg.cc/j5qncT92/IMG_20260205_WA0004.jpg";
 const SUPPORT_EMAIL = "mxpteamsuport@gmail.com";
+const YOUTUBE_URL = "https://youtube.com/@odev_5?si=BbTidOTcWIyeNVNl";
 const DISCORD_URL = "https://discord.gg/e2ty8RQyu";
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
@@ -78,16 +79,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
       playSound(XP_SOUNDS.ERROR, 0.7);
       setError('Senha incorreta.');
       setPassword('');
-    }
-  };
-
-  const copySupport = () => {
-    try {
-      navigator.clipboard.writeText(SUPPORT_EMAIL);
-      playSound(XP_SOUNDS.NOTIFY);
-      alert("E-mail de suporte copiado!");
-    } catch (e) {
-      alert(SUPPORT_EMAIL);
     }
   };
 
@@ -204,11 +195,21 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                 <span className="text-[10px] font-bold text-blue-900 uppercase">MXP Work Group</span>
               </div>
               <div className="space-y-4 text-xs">
-                <p>Desenvolvimento: <strong>MXP Work Team</strong></p>
+                <p className="border-b pb-1 font-bold text-blue-900">Desenvolvimento:</p>
+                <p className="mb-4"><strong>MXP Work Team</strong></p>
+
+                <p className="border-b pb-1 font-bold text-red-700">Canal YouTube:</p>
+                <div className="bg-red-50 border border-red-200 p-3 rounded mb-4 text-center">
+                  <a href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer" className="bg-[#FF0000] text-white px-4 py-2 rounded font-bold text-[10px] uppercase shadow-md flex items-center justify-center gap-2 hover:brightness-110">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg" className="w-6 invert" alt="" />
+                    Inscreva-se no Canal
+                  </a>
+                </div>
+
                 <div className="bg-yellow-50 border border-yellow-300 p-4 rounded text-center space-y-3">
                     <p className="font-bold text-red-700">ESCANEIE PARA DOAR (PIX):</p>
                     <img src={PIX_QR_URL} className="w-32 h-32 mx-auto border bg-white" alt="PIX" />
-                    <p className="font-bold text-blue-800 text-[10px] uppercase">mxpteamsuport@gmail.com</p>
+                    <p className="font-bold text-blue-800 text-[10px] uppercase">{SUPPORT_EMAIL}</p>
                 </div>
               </div>
             </div>
