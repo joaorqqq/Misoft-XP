@@ -21,7 +21,7 @@ import { CommandPrompt } from './apps/CommandPrompt';
 import { playSound, XP_SOUNDS, unlockAudio } from './utils/sounds';
 
 const INITIAL_DESKTOP: DesktopItem[] = DESKTOP_ICONS.map(i => ({
-  id: `initial-${i.id}`,
+  id: 'initial-' + i.id,
   appId: i.id,
   label: i.label,
   icon: i.icon,
@@ -39,24 +39,35 @@ const App: React.FC = () => {
   const [isCrashed, setIsCrashed] = useState(false);
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
 
-  // Garante que o loader seja removido
+  // Garante a remoção do loader de forma segura para Smart TVs
   useEffect(() => {
-    const loader = document.getElementById('root-loader');
-    if (loader) {
-      setTimeout(() => {
+    const removeLoader = () => {
+      const loader = document.getElementById('root-loader');
+      if (loader) {
         loader.style.opacity = '0';
-        setTimeout(() => loader.style.display = 'none', 500);
-      }, 1000);
+        setTimeout(() => {
+          loader.style.display = 'none';
+        }, 800);
+      }
+    };
+
+    // Se autenticado ou após um timeout curto, removemos o loader
+    if (isAuthenticated) {
+      removeLoader();
     }
-  }, []);
+
+    // Backup: Se demorar demais no mount, removemos o loader mesmo sem auth (para mostrar a tela de login)
+    const timeout = setTimeout(removeLoader, 1500);
+    return () => clearTimeout(timeout);
+  }, [isAuthenticated]);
 
   const handleLogin = useCallback((username: string, wasAdminCode?: boolean) => {
     setIsAuthenticated(true);
     setCurrentUser({
-      username,
+      username: username,
       password: '',
-      avatar: `https://picsum.photos/seed/${username}/64`,
-      isAdmin: wasAdminCode
+      avatar: 'https://picsum.photos/seed/' + username + '/64',
+      isAdmin: wasAdminCode || false
     });
   }, []);
 
@@ -69,7 +80,7 @@ const App: React.FC = () => {
   }, [maxZ]);
 
   const openApp = useCallback((appId: AppId, title: string, icon: string, data?: any) => {
-    const winId = appId === AppId.FOLDER ? `folder-${JSON.stringify(data || '').length}-${title}` : `app-${appId}`;
+    const winId = appId === AppId.FOLDER ? 'folder-' + title : 'app-' + appId;
     
     setWindows(prev => {
       const existingIndex = prev.findIndex(w => w.id === winId);
@@ -87,24 +98,24 @@ const App: React.FC = () => {
         return updated;
       }
       
-      const isLargeScreen = window.innerWidth >= 1280; // Desktop real
-      const isOSK = appId === AppId.OSK;
+      const isTV = window.innerWidth <= 1920 && window.innerHeight <= 1080; // Detecta resoluções de TV comuns
+      const isMobile = window.innerWidth < 1024;
+      const shouldMaximize = isTV || isMobile;
 
       const newWin: WindowState = {
         id: winId,
-        appId,
-        title,
-        icon,
+        appId: appId,
+        title: title,
+        icon: icon,
         isOpen: true,
         isMinimized: false,
-        // Em TVs ou celulares, abre maximizado por padrão para facilitar a visão
-        isMaximized: !isLargeScreen && !isOSK, 
+        isMaximized: shouldMaximize && appId !== AppId.OSK && appId !== AppId.CALCULATOR,
         zIndex: newZ,
-        x: isLargeScreen ? 100 + (prev.length * 30) : 0,
-        y: isLargeScreen ? 100 + (prev.length * 30) : 0,
-        width: isOSK ? (isLargeScreen ? 500 : '100%') : (isLargeScreen ? 800 : '100%'),
-        height: isOSK ? (isLargeScreen ? 250 : 200) : (isLargeScreen ? 500 : 'calc(100% - 30px)'),
-        data
+        x: shouldMaximize ? 0 : 50 + (prev.length * 25),
+        y: shouldMaximize ? 0 : 50 + (prev.length * 25),
+        width: appId === AppId.OSK ? '100%' : (shouldMaximize ? '100%' : 700),
+        height: appId === AppId.OSK ? 220 : (shouldMaximize ? 'calc(100% - 30px)' : 500),
+        data: data
       };
       
       return [...prev, newWin];
@@ -145,7 +156,7 @@ const App: React.FC = () => {
   return (
     <div
       className="w-full h-screen relative bg-cover bg-center overflow-hidden touch-none flex flex-col select-none"
-      style={{ backgroundImage: `url(${WALLPAPER_URL})` }}
+      style={{ backgroundImage: 'url(' + WALLPAPER_URL + ')' }}
       onPointerDown={(e) => {
         if (e.target === e.currentTarget) {
           setSelectedItemIds(new Set());
@@ -154,13 +165,13 @@ const App: React.FC = () => {
         unlockAudio();
       }}
     >
-      {/* Desktop Area com Grid Responsivo para TV */}
-      <div className="flex-1 relative z-0 p-4 overflow-hidden">
+      {/* Desktop Area com Grid Flexível para TV */}
+      <div className="flex-1 relative z-0 p-2 sm:p-4 overflow-hidden">
         <div 
-          className="grid gap-2 h-full content-start justify-items-center"
+          className="grid gap-1 sm:gap-2 h-full content-start justify-items-center"
           style={{ 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
-            gridAutoRows: '110px'
+            gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))',
+            gridAutoRows: 'min-content'
           }}
         >
           {desktopItems.map(i => (
@@ -180,7 +191,7 @@ const App: React.FC = () => {
             onClose={() => setWindows(prev => prev.map(w => w.id === win.id ? { ...w, isOpen: false } : w))}
             onMinimize={() => setWindows(prev => {
               const target = prev.find(w => w.id === win.id);
-              if (target?.isMinimized) {
+              if (target && target.isMinimized) {
                 const newZ = maxZ + 1; setMaxZ(newZ);
                 return prev.map(w => w.id === win.id ? { ...w, isMinimized: false, zIndex: newZ } : w);
               }
@@ -196,7 +207,7 @@ const App: React.FC = () => {
 
       <StartMenu 
         isOpen={isStartOpen} 
-        isAdmin={currentUser?.isAdmin}
+        isAdmin={currentUser ? currentUser.isAdmin : false}
         onOpenApp={(appId) => {
           const iconData = DESKTOP_ICONS.find(d => d.id === appId) || { label: appId, icon: '' };
           openApp(appId, iconData.label, iconData.icon);
@@ -210,8 +221,8 @@ const App: React.FC = () => {
         onOpenApp={(appId, title, icon) => openApp(appId, title, icon)}
         onWindowToggle={(id) => {
           const win = windows.find(w => w.id === id);
-          if (win?.isMinimized || (win && win.zIndex !== Math.max(...windows.map(w => w.zIndex)))) {
-            focusWin(id as string);
+          if (win && (win.isMinimized || win.zIndex !== Math.max(...windows.map(w => w.zIndex)))) {
+            focusWin(id);
           } else {
             setWindows(prev => prev.map(w => w.id === id ? { ...w, isMinimized: true } : w));
           }

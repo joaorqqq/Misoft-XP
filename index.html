@@ -14,20 +14,8 @@
       --xp-border: #0053e1;
     }
 
-    [data-theme='olive'] {
-      --xp-blue: #738a5d;
-      --xp-blue-light: #a5bd8e;
-      --xp-taskbar: #839b6b;
-      --xp-border: #4a5a3a;
-    }
-
-    @font-face {
-      font-family: 'Tahoma';
-      src: local('Tahoma'), local('Arial');
-    }
-
     body {
-      font-family: 'Tahoma', sans-serif;
+      font-family: 'Tahoma', 'Arial', sans-serif;
       overflow: hidden;
       user-select: none;
       background-color: #5A7EDC; 
@@ -54,41 +42,62 @@
     .xp-scrollbar::-webkit-scrollbar { width: 16px; height: 16px; }
     .xp-scrollbar::-webkit-scrollbar-track { background: #f0f0f0; border: 1px solid #dcdcdc; }
     .xp-scrollbar::-webkit-scrollbar-thumb { background: #c0c0c0; border: 1px solid #808080; box-shadow: inset 1px 1px 1px white; }
-    .xp-scrollbar::-webkit-scrollbar-button { background: #c0c0c0; border: 1px solid #808080; display: block; width: 16px; height: 16px; }
 
     .xp-icon-text { text-shadow: 1px 1px 2px black; }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
     
-    @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-    .animate-xp-open { animation: fadeIn 0.15s ease-out; }
-
-    /* Estilo do cursor para TV */
-    .tv-mode { cursor: default; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .animate-xp-open { animation: fadeIn 0.2s ease-out; }
   </style>
-  <!-- Polyfill para Import Maps em TVs Antigas -->
+
+  <!-- Polyfill de alta compatibilidade para Smart TVs -->
   <script async src="https://ga.jspm.io/npm:es-module-shims@1.10.1/dist/es-module-shims.js"></script>
   <script type="importmap">
-  {
-    "imports": {
-      "react": "https://esm.sh/react@^19.2.4",
-      "react-dom": "https://esm.sh/react-dom@^19.2.4",
-      "react-dom/client": "https://esm.sh/react-dom@^19.2.4/client",
-      "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-      "react/": "https://esm.sh/react@^19.2.4/"
-    }
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom": "https://esm.sh/react-dom@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "react/": "https://esm.sh/react@18.2.0/",
+    "react-dom/": "https://esm.sh/react-dom@18.2.0/"
   }
-  </script>
+}
+</script>
 </head>
-<body class="tv-mode">
+<body class="bg-[#5A7EDC]">
   <div id="root"></div>
   
-  <div id="root-loader" style="position: fixed; inset: 0; z-index: 999999; display: flex; align-items: center; justify-content: center; background: #5A7EDC; color: white; font-family: Tahoma;">
-    <div style="text-align: center;">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/d/df/Microsoft_Windows_XP_Logo.svg" width="200" style="margin-bottom: 20px;">
-      <div style="font-weight: bold; font-size: 18px;">Iniciando MXP Work...</div>
-      <div style="margin-top: 10px; opacity: 0.6; font-size: 12px;">Carregando Kernel para TV & Mobile...</div>
+  <!-- Loader de Sistema -->
+  <div id="root-loader" style="position: fixed; inset: 0; z-index: 999999; display: flex; align-items: center; justify-content: center; background: #5A7EDC; color: white; transition: opacity 0.8s ease-in-out;">
+    <div style="text-align: center; font-family: sans-serif;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/d/df/Microsoft_Windows_XP_Logo.svg" width="180" style="margin-bottom: 30px;">
+      <div style="font-weight: bold; font-size: 20px; letter-spacing: 1px;">Iniciando MXP Work...</div>
+      <div id="loader-status" style="margin-top: 15px; opacity: 0.7; font-size: 13px;">Preparando interface para TV...</div>
+      
+      <!-- Barra de progresso visual (estilo XP) -->
+      <div style="width: 150px; background: #333; border: 2px solid #ccc; height: 15px; margin: 20px auto; position: relative; overflow: hidden;">
+        <div style="width: 30px; height: 100%; background: linear-gradient(to right, #245edb, #3b8cf8); position: absolute; animation: xp-loading 2s infinite linear;"></div>
+      </div>
     </div>
   </div>
+
+  <style>
+    @keyframes xp-loading {
+      from { left: -30px; }
+      to { left: 150px; }
+    }
+  </style>
+
+  <script>
+    // Failsafe: Se o React não carregar em 8 segundos, remove o loader para mostrar o erro ou o fundo
+    setTimeout(function() {
+      var loader = document.getElementById('root-loader');
+      if (loader && loader.style.display !== 'none') {
+        console.warn("Failsafe: Forçando remoção do loader.");
+        loader.style.opacity = '0';
+        setTimeout(function() { loader.style.display = 'none'; }, 800);
+      }
+    }, 8000);
+  </script>
 
   <script type="module" src="index.tsx"></script>
 </body>
