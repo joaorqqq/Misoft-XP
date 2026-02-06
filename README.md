@@ -1,30 +1,20 @@
 <div align="center">
-  <img width="1200" src="https://i.postimg.cc/cHJGzv01/Picsart-26-02-06-15-16-00-966.jpg" alt="Banner Windows XP" />
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Windows XP - Web Experience
+# Run and deploy your AI Studio app
 
-Este projeto é uma recriação fiel da interface do **Windows XP** utilizando tecnologias web. O objetivo é simular a experiência do sistema operacional diretamente no navegador, trazendo de volta o desktop, o menu iniciar e o sistema de janelas que definiram uma era da computação.
+This contains everything you need to run your app locally.
 
-### 🧩 Sobre o Projeto:
-* **Interface Fiel:** Recriação visual dos elementos que compõem o sistema.
-* **Sistema de Janelas:** Funcionalidade de arrastar, minimizar e fechar janelas.
-* **Barra de Tarefas e Menu Iniciar:** Navegação nostálgica e funcional.
-* **Experiência Retrô:** Um tributo ao design e à usabilidade do Windows XP.
+View your app in AI Studio: https://ai.studio/apps/drive/1Mxa-Efswe7-kTZMqz2bnkTx1G_wZR6DO
 
----
+## Run Locally
 
-## ❤️ Se quiser ajudar no projeto
+**Prerequisites:**  Node.js
 
-Se você curtiu esse projeto e quer apoiar o desenvolvimento de novas funcionalidades, sua ajuda é muito bem-vinda!
 
-### Apoie via Pix:
-<div align="center">
-  <img src="https://i.postimg.cc/j5qncT92/IMG_20260205_WA0004.jpg" alt="QR Code Pix" width="250" />
-</div>
-
----
-
-<p align="center">
-  Revivendo a história da computação. 🚀
-</p>
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`
