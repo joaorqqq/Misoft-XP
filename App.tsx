@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { WindowState, AppId, DesktopItem, User } from './types';
 import { DESKTOP_ICONS, WALLPAPER_URL } from './components/constants';
 import { DesktopIcon } from './components/DesktopIcon';
@@ -14,7 +14,6 @@ import { MSNMessenger } from './apps/MSNMessenger';
 import { MediaPlayer } from './apps/MediaPlayer';
 import { BSOD } from './components/BSOD';
 import { LoginScreen } from './components/LoginScreen';
-import { Credits } from './apps/Credits';
 import { VirtualKeyboard } from './apps/VirtualKeyboard';
 import { Calculator } from './apps/Calculator';
 import { CommandPrompt } from './apps/CommandPrompt';
@@ -39,27 +38,14 @@ const App: React.FC = () => {
   const [isCrashed, setIsCrashed] = useState(false);
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
 
-  // Garante a remoção do loader de forma segura para Smart TVs
+  // Garante a remoção do loader
   useEffect(() => {
-    const removeLoader = () => {
-      const loader = document.getElementById('root-loader');
-      if (loader) {
-        loader.style.opacity = '0';
-        setTimeout(() => {
-          loader.style.display = 'none';
-        }, 800);
-      }
-    };
-
-    // Se autenticado ou após um timeout curto, removemos o loader
-    if (isAuthenticated) {
-      removeLoader();
+    const loader = document.getElementById('root-loader');
+    if (loader) {
+      loader.style.opacity = '0';
+      setTimeout(() => { loader.style.display = 'none'; }, 500);
     }
-
-    // Backup: Se demorar demais no mount, removemos o loader mesmo sem auth (para mostrar a tela de login)
-    const timeout = setTimeout(removeLoader, 1500);
-    return () => clearTimeout(timeout);
-  }, [isAuthenticated]);
+  }, []);
 
   const handleLogin = useCallback((username: string, wasAdminCode?: boolean) => {
     setIsAuthenticated(true);
@@ -69,6 +55,8 @@ const App: React.FC = () => {
       avatar: 'https://picsum.photos/seed/' + username + '/64',
       isAdmin: wasAdminCode || false
     });
+    unlockAudio();
+    playSound(XP_SOUNDS.STARTUP);
   }, []);
 
   const focusWin = useCallback((id: string) => {
@@ -83,41 +71,26 @@ const App: React.FC = () => {
     const winId = appId === AppId.FOLDER ? 'folder-' + title : 'app-' + appId;
     
     setWindows(prev => {
-      const existingIndex = prev.findIndex(w => w.id === winId);
+      const existing = prev.find(w => w.id === winId);
       const newZ = maxZ + 1;
       setMaxZ(newZ);
 
-      if (existingIndex !== -1) {
-        const updated = [...prev];
-        updated[existingIndex] = {
-          ...updated[existingIndex],
-          isOpen: true,
-          isMinimized: false,
-          zIndex: newZ
-        };
-        return updated;
+      if (existing) {
+        return prev.map(w => w.id === winId ? { ...w, isOpen: true, isMinimized: false, zIndex: newZ } : w);
       }
       
-      const isTV = window.innerWidth <= 1920 && window.innerHeight <= 1080; // Detecta resoluções de TV comuns
-      const isMobile = window.innerWidth < 1024;
-      const shouldMaximize = isTV || isMobile;
-
+      const isTV = window.innerWidth <= 1920;
       const newWin: WindowState = {
-        id: winId,
-        appId: appId,
-        title: title,
-        icon: icon,
-        isOpen: true,
-        isMinimized: false,
-        isMaximized: shouldMaximize && appId !== AppId.OSK && appId !== AppId.CALCULATOR,
+        id: winId, appId: appId, title: title, icon: icon,
+        isOpen: true, isMinimized: false,
+        isMaximized: isTV && appId !== AppId.OSK && appId !== AppId.CALCULATOR,
         zIndex: newZ,
-        x: shouldMaximize ? 0 : 50 + (prev.length * 25),
-        y: shouldMaximize ? 0 : 50 + (prev.length * 25),
-        width: appId === AppId.OSK ? '100%' : (shouldMaximize ? '100%' : 700),
-        height: appId === AppId.OSK ? 220 : (shouldMaximize ? 'calc(100% - 30px)' : 500),
+        x: isTV ? 0 : 50 + (prev.length * 20),
+        y: isTV ? 0 : 50 + (prev.length * 20),
+        width: isTV ? '100%' : 700,
+        height: isTV ? 'calc(100% - 30px)' : 500,
         data: data
       };
-      
       return [...prev, newWin];
     });
     
@@ -132,7 +105,6 @@ const App: React.FC = () => {
       case AppId.PAINT: return <Paint />;
       case AppId.MSN_MESSENGER: return <MSNMessenger />;
       case AppId.MEDIA_PLAYER: return <MediaPlayer />;
-      case AppId.CREDITS: return <Credits />;
       case AppId.OSK: return <VirtualKeyboard />;
       case AppId.CALCULATOR: return <Calculator />;
       case AppId.CMD: return <CommandPrompt />;
@@ -150,7 +122,14 @@ const App: React.FC = () => {
     }
   };
 
-  if (isCrashed) return <BSOD onRestart={() => setIsCrashed(false)} onEasterEgg={() => {}} />;
+  const restartSystem = () => {
+    setIsCrashed(false);
+    setWindows([]);
+    setIsAuthenticated(false);
+    window.location.reload();
+  };
+
+  if (isCrashed) return <BSOD onRestart={restartSystem} onEasterEgg={() => {}} />;
   if (!isAuthenticated) return <LoginScreen onLogin={handleLogin} />;
 
   return (
@@ -162,28 +141,18 @@ const App: React.FC = () => {
           setSelectedItemIds(new Set());
           setIsStartOpen(false);
         }
-        unlockAudio();
       }}
     >
-      {/* Desktop Area com Grid Flexível para TV */}
-      <div className="flex-1 relative z-0 p-2 sm:p-4 overflow-hidden">
-        <div 
-          className="grid gap-1 sm:gap-2 h-full content-start justify-items-center"
-          style={{ 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))',
-            gridAutoRows: 'min-content'
-          }}
-        >
-          {desktopItems.map(i => (
-            <DesktopIcon 
-              key={i.id} id={i.id} label={i.label} icon={i.icon}
-              gridX={i.gridX} gridY={i.gridY}
-              onOpen={() => openApp(i.appId, i.label, i.icon, i.items)} 
-              onMove={(id, x, y) => setDesktopItems(prev => prev.map(item => item.id === id ? { ...item, gridX: x, gridY: y } : item))}
-              isSelected={selectedItemIds.has(i.id)}
-            />
-          ))}
-        </div>
+      <div className="flex-1 relative z-0 p-4">
+        {desktopItems.map(i => (
+          <DesktopIcon 
+            key={i.id} id={i.id} label={i.label} icon={i.icon}
+            gridX={i.gridX} gridY={i.gridY}
+            onOpen={() => openApp(i.appId, i.label, i.icon, i.items)} 
+            onMove={(id, x, y) => setDesktopItems(prev => prev.map(item => item.id === id ? { ...item, gridX: x, gridY: y } : item))}
+            isSelected={selectedItemIds.has(i.id)}
+          />
+        ))}
         
         {windows.map(win => win.isOpen && (
           <Window
@@ -207,7 +176,7 @@ const App: React.FC = () => {
 
       <StartMenu 
         isOpen={isStartOpen} 
-        isAdmin={currentUser ? currentUser.isAdmin : false}
+        isAdmin={currentUser?.isAdmin}
         onOpenApp={(appId) => {
           const iconData = DESKTOP_ICONS.find(d => d.id === appId) || { label: appId, icon: '' };
           openApp(appId, iconData.label, iconData.icon);
