@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Windows XP Professional - MXP Work Edition</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --xp-blue: #0058e4;
+      --xp-blue-light: #3b8cf8;
+      --xp-taskbar: #245edb;
+      --xp-border: #0053e1;
+    }
+
+    [data-theme='olive'] {
+      --xp-blue: #738a5d;
+      --xp-blue-light: #a5bd8e;
+      --xp-taskbar: #839b6b;
+      --xp-border: #4a5a3a;
+    }
+
+    @font-face {
+      font-family: 'Tahoma';
+      src: local('Tahoma'), local('Arial');
+    }
+
+    body {
+      font-family: 'Tahoma', sans-serif;
+      overflow: hidden;
+      user-select: none;
+      background-color: black;
+    }
+
+    .xp-window-shadow {
+      box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.6);
+    }
+
+    .xp-blue-gradient {
+      background: linear-gradient(to bottom, var(--xp-blue) 0%, var(--xp-blue-light) 5%, var(--xp-blue) 10%, var(--xp-blue) 90%, #114fb1 95%, #114fb1 100%);
+    }
+
+    .xp-taskbar-gradient {
+      background: linear-gradient(to bottom, var(--xp-taskbar) 0%, #3f8cf3 9%, var(--xp-taskbar) 18%, var(--xp-taskbar) 92%, #1941a5 100%);
+    }
+
+    .xp-start-button-gradient {
+      background: linear-gradient(to bottom, #388238 0%, #54a554 5%, #449244 10%, #449244 90%, #2e6d2e 95%, #2e6d2e 100%);
+      box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+    }
+
+    .xp-scrollbar::-webkit-scrollbar { width: 16px; height: 16px; }
+    .xp-scrollbar::-webkit-scrollbar-track { background: #f0f0f0; border: 1px solid #dcdcdc; }
+    .xp-scrollbar::-webkit-scrollbar-thumb { background: #c0c0c0; border: 1px solid #808080; box-shadow: inset 1px 1px 1px white; }
+    .xp-scrollbar::-webkit-scrollbar-button { background: #c0c0c0; border: 1px solid #808080; display: block; width: 16px; height: 16px; }
+
+    .xp-icon-text { text-shadow: 1px 1px 2px black; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    .animate-xp-open { animation: fadeIn 0.15s ease-out; }
+  </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/"
+  }
+}
+</script>
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>
