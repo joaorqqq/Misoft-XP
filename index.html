@@ -42,8 +42,8 @@
     "react": "https://esm.sh/react@18.2.0",
     "react-dom": "https://esm.sh/react-dom@18.2.0",
     "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "react/": "https://esm.sh/react@^19.2.4/"
+    "react/": "https://esm.sh/react@18.2.0/",
+    "react-dom/": "https://esm.sh/react-dom@18.2.0/"
   }
 }
 </script>
@@ -54,24 +54,25 @@
   <div id="root-loader" style="position: fixed; inset: 0; z-index: 999999; display: flex; align-items: center; justify-content: center; background: #5A7EDC; transition: opacity 0.5s;">
     <div style="text-align: center;">
       <img src="https://upload.wikimedia.org/wikipedia/commons/d/df/Microsoft_Windows_XP_Logo.svg" width="160" style="margin-bottom: 20px;">
-      <div style="font-weight: bold; font-size: 18px;">Iniciando MXP Work...</div>
+      <div style="font-weight: bold; font-size: 18px; color: white;">Iniciando MXP Work...</div>
       <div style="width: 150px; background: #333; border: 2px solid #ccc; height: 12px; margin: 20px auto; position: relative; overflow: hidden;">
         <div style="width: 40px; height: 100%; background: #3b8cf8; position: absolute; animation: xp-loading 1.5s infinite linear;"></div>
       </div>
-      <div style="font-size: 10px; opacity: 0.5;">Aguarde, otimizando Kernel para sua TV</div>
+      <div style="font-size: 10px; opacity: 0.5; color: white;">Aguarde, otimizando Kernel para sua TV</div>
     </div>
   </div>
 
   <script>
-    // Failsafe: Remove o loader se o React demorar ou falhar
+    // Failsafe: Se o React não conseguir montar o app em 8s, remove o loader na marra
     window.addEventListener('load', function() {
       setTimeout(function() {
         var loader = document.getElementById('root-loader');
-        if (loader) {
+        if (loader && loader.style.display !== 'none') {
+          console.warn("Remoção forçada do loader (Failsafe ativo).");
           loader.style.opacity = '0';
           setTimeout(function() { loader.style.display = 'none'; }, 500);
         }
-      }, 6000);
+      }, 8000);
     });
   </script>
 
