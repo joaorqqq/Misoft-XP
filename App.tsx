@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { WindowState, AppId, DesktopItem, User } from './types';
 import { DESKTOP_ICONS, WALLPAPER_URL } from './components/constants';
 import { DesktopIcon } from './components/DesktopIcon';
@@ -38,6 +38,13 @@ const App: React.FC = () => {
   const [maxZ, setMaxZ] = useState(100);
   const [isCrashed, setIsCrashed] = useState(false);
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
+  const [showBrokenLines, setShowBrokenLines] = useState(false);
+
+  // Remove o loader do HTML assim que o componente monta
+  useEffect(() => {
+    const loader = document.getElementById('root-loader');
+    if (loader) loader.style.display = 'none';
+  }, []);
 
   const handleLogin = useCallback((username: string, wasAdminCode?: boolean) => {
     setIsAuthenticated(true);
@@ -76,7 +83,7 @@ const App: React.FC = () => {
         return updated;
       }
       
-      const isMobile = window.innerWidth < 768;
+      const isMobile = window.innerWidth < 1024; // TVs e dispositivos menores usam modo adaptativo
       const isOSK = appId === AppId.OSK;
 
       const newWin: WindowState = {
@@ -86,12 +93,12 @@ const App: React.FC = () => {
         icon,
         isOpen: true,
         isMinimized: false,
-        isMaximized: isMobile && !isOSK, // Apps abrem maximizados no celular
+        isMaximized: isMobile && !isOSK, 
         zIndex: newZ,
-        x: isMobile ? 0 : 100 + (prev.length * 20),
-        y: isMobile ? 0 : 100 + (prev.length * 20),
-        width: isOSK ? (isMobile ? '100%' : 400) : (isMobile ? '100%' : (appId === AppId.INTERNET_EXPLORER ? '80%' : 600)),
-        height: isOSK ? 200 : (isMobile ? 'calc(100% - 30px)' : 450),
+        x: isMobile ? 0 : 50 + (prev.length * 30),
+        y: isMobile ? 0 : 50 + (prev.length * 30),
+        width: isOSK ? (isMobile ? '100%' : 500) : (isMobile ? '100%' : 700),
+        height: isOSK ? (isMobile ? 220 : 250) : (isMobile ? 'calc(100% - 30px)' : 500),
         data
       };
       
@@ -127,6 +134,16 @@ const App: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const handleKeys = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'l') {
+        setShowBrokenLines(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeys);
+    return () => window.removeEventListener('keydown', handleKeys);
+  }, []);
+
   if (isCrashed) return <BSOD onRestart={() => setIsCrashed(false)} onEasterEgg={() => {}} />;
   if (!isAuthenticated) return <LoginScreen onLogin={handleLogin} />;
 
@@ -142,9 +159,28 @@ const App: React.FC = () => {
         unlockAudio();
       }}
     >
-      <div className="flex-1 relative z-0 p-4">
-        {/* Desktop Icons com grid responsivo via CSS inline */}
-        <div className="grid grid-flow-col grid-rows-[repeat(auto-fill,100px)] gap-2 h-full content-start">
+      {/* Overlay de Linhas da TV (Conforme a Foto) */}
+      {showBrokenLines && (
+        <div className="absolute inset-0 pointer-events-none z-[999999] opacity-80">
+          <div className="absolute top-0 bottom-0 left-[20%] w-[4px] bg-black shadow-[0_0_10px_black]"></div>
+          <div className="absolute top-0 bottom-0 left-[21%] w-[1px] bg-black/40"></div>
+          <div className="absolute top-0 bottom-0 left-[21.5%] w-[1px] bg-gray-900/50"></div>
+          <div className="absolute top-0 bottom-0 left-[35%] w-[2px] bg-black/80"></div>
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] bg-[length:100%_2px,3px_100%]"></div>
+        </div>
+      )}
+
+      {/* Botão flutuante "Atualizar" estilo TV */}
+      <div className="absolute top-4 right-4 z-[500] flex flex-col items-end pointer-events-none sm:pointer-events-auto">
+         <div className="bg-[#00bcd4] text-white px-4 py-1.5 rounded-sm text-sm font-bold shadow-lg animate-bounce flex items-center gap-2">
+            <span>Atuliazar</span>
+            <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-[#00bcd4] absolute -bottom-2 right-4"></div>
+         </div>
+      </div>
+
+      <div className="flex-1 relative z-0 p-2 sm:p-4 overflow-hidden">
+        {/* Desktop Icons com grid auto-ajustável para TVs */}
+        <div className="grid grid-flow-col grid-rows-[repeat(auto-fill,90px)] sm:grid-rows-[repeat(auto-fill,105px)] gap-1 sm:gap-2 h-full content-start justify-start overflow-hidden">
           {desktopItems.map(i => (
             <DesktopIcon 
               key={i.id} id={i.id} label={i.label} icon={i.icon}
